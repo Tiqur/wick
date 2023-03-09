@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+type OHLC = [number, number, number, number, number];
+
 
 function setCandleMatrix(matrix: THREE.Matrix4, position = new THREE.Vector3(0, 0, 0), quaternion = new THREE.Quaternion(), scale = new THREE.Vector3(1, 1, 1)) {
   matrix.compose(position, quaternion, scale)
@@ -12,8 +14,8 @@ function addDynamicCandle(scene: THREE.Scene) {
   scene.add(mesh);
 }
 
-function addStaticCandles(scene: THREE.Scene) {
-  const count = 100;
+function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
+  const count = ohlcData.length;
 
   // Use as cache as to not create a new object every candle
   const mutableCandleMatrix = new THREE.Matrix4();
@@ -23,11 +25,11 @@ function addStaticCandles(scene: THREE.Scene) {
   const mesh = new THREE.InstancedMesh(geometry, material, count) ;
 
   for (let i = 0; i < count; i++) {
-    setCandleMatrix(mutableCandleMatrix, new THREE.Vector3(0, 0, 0));
+    setCandleMatrix(mutableCandleMatrix, new THREE.Vector3(Math.random()*1, Math.random()*1, Math.random()*1));
     mesh.setMatrixAt(i, mutableCandleMatrix);
   }
 
   scene.add(mesh);
 }
 
-export { addStaticCandles, addDynamicCandle };
+export { addStaticCandles, addDynamicCandle, OHLC };
