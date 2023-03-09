@@ -10,6 +10,10 @@ export default class Wick {
 
   constructor(container: HTMLElement) {
     this.container = container;
+    this.init();
+  }
+
+  init() {
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
     
@@ -22,16 +26,14 @@ export default class Wick {
     // Init scene
     this.scene = new THREE.Scene();
 
-    this.init();
-  }
-
-  init() {
     // Set defaults
     this.setBackgroundColor('#171b26')
 
     // Setup renderer
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio)
+
+    // Append to DOM
     this.container.append(this.renderer.domElement);
   }
 
