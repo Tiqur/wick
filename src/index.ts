@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import Wick from './Wick';
+import Wick from './systems/wick';
 
 
 
