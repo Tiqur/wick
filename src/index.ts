@@ -36,8 +36,8 @@ cameraFolder.add(camera, 'y', -10, 10);
 cameraFolder.add(camera, 'z', -10, 10);
 cameraFolder.open()
 
-//addDynamicCandle(wick.scene);
-addStaticCandles(wick.scene, debugCandles as OHLC[]);
+addDynamicCandle(wick.scene, debugCandles[0] as OHLC);
+//addStaticCandles(wick.scene, debugCandles as OHLC[]);
 
 wick.camera.position.z = 5;
 wick.render();

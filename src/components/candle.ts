@@ -7,13 +7,31 @@ function setCandleMatrix(matrix: THREE.Matrix4, position = new THREE.Vector3(0, 
   matrix.compose(position, quaternion, scale)
 }
 
+function getCandleColor(open: number, close: number) {
+  return open < close ? '#d1d4dc' : '#3179f5';
+}
+
 
 // The niave method is good for very dynamic objects, but try not to use it too much
-function addDynamicCandle(scene: THREE.Scene) {
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
+function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
+
+  // Contains entire candle
+  const group = new THREE.Group();
+  
+  // Candle body
+  const body_geometry = new THREE.PlaneGeometry(1, 2);
+  const body_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
+  const body_mesh = new THREE.Mesh(body_geometry, body_material);
+  group.add(body_mesh);
+
+  // Candle wick
+  const wick_geometry = new THREE.PlaneGeometry(0.1, 3);
+  const wick_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
+  const wick_mesh = new THREE.Mesh(wick_geometry, wick_material);
+  group.add(wick_mesh);
+
+
+  scene.add(group);
 }
 
 
