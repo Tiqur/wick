@@ -15,5 +15,9 @@
     "build:dev": "webpack --mode=development",
     "build:prod": "webpack --mode=production --node-env=production",
     "watch": "webpack --watch"
+  },
+  "dependencies": {
+    "@types/three": "^0.149.0",
+    "three": "^0.150.1"
   }
 }
