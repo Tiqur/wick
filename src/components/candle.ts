@@ -7,6 +7,8 @@ function setCandleMatrix(matrix: THREE.Matrix4, position = new THREE.Vector3(0, 
   matrix.compose(position, quaternion, scale)
 }
 
+
+// The niave method is good for very dynamic objects, but try not to use it too much
 function addDynamicCandle(scene: THREE.Scene) {
   const geometry = new THREE.PlaneGeometry(1, 1);
   const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
@@ -14,6 +16,8 @@ function addDynamicCandle(scene: THREE.Scene) {
   scene.add(mesh);
 }
 
+
+// These candles are static, meaning they are fast, but cannot change
 function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
   const count = ohlcData.length;
 
@@ -28,6 +32,9 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
     setCandleMatrix(mutableCandleMatrix, new THREE.Vector3(Math.random()*1, Math.random()*1, Math.random()*1));
     mesh.setMatrixAt(i, mutableCandleMatrix);
   }
+
+  // Makes it so 3js doesn't automatically update the transofrmation matrix
+  mesh.matrixAutoUpdate = false;
 
   scene.add(mesh);
 }
