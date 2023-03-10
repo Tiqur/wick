@@ -4,10 +4,13 @@ import Loop from './loop';
 import {GUI} from 'dat.gui';
 import FpsCounter from './fpsCounter';
 import GridHelper from './gridHelper';
+import CombinedCamera from './combinedCamera';
 
 interface DebugSettings {
   FpsCounter: boolean
   GridHelper: boolean
+  OrbitControls: boolean
+  CameraType: 'orthographic' | 'perspective'
 }
 
 export default class Wick {
@@ -23,6 +26,7 @@ export default class Wick {
   showDebugGui: boolean = false;
   fpsCounter: FpsCounter;
   gridHelper: GridHelper;
+  combinedCamera: CombinedCamera;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -34,6 +38,8 @@ export default class Wick {
     this.debugSettings = {
       FpsCounter: true,
       GridHelper: false,
+      OrbitControls: false,
+      CameraType: 'orthographic'
     }
   }
 
@@ -55,6 +61,11 @@ export default class Wick {
 
     // Init scene
     this.scene = new THREE.Scene();
+
+    // Set orthographic camera as default
+    this.combinedCamera = new CombinedCamera(this.scene);
+    this.combinedCamera.enableOrthographicCamera();
+
 
     // Init resizer
     //const resizer = new Resizer(this.container, this.camera, this.renderer);
@@ -97,6 +108,7 @@ export default class Wick {
   _updateDebugFeaturesStates() {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
     this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
+    this.combinedCamera[this.debugSettings.CameraType ? 'enableOrthographicCamera' : 'enablePerspectiveCamera']();
   }
 
   _initDebugGUI() {
@@ -106,6 +118,10 @@ export default class Wick {
         this._updateDebugFeaturesStates();
       })
     debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper)
+      .onChange(() => {
+        this._updateDebugFeaturesStates();
+      })
+    debugFolder.add(this.debugSettings, 'CameraType', ["orthographic", "perspective"])
       .onChange(() => {
         this._updateDebugFeaturesStates();
       })
