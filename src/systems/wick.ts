@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import Resizer from './resizer';
 
 export default class Wick {
   container: HTMLElement;
   width: number;
   height: number;
   renderer: THREE.WebGLRenderer;
-  camera: THREE.Camera;
+  camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
 
   constructor(container: HTMLElement) {
@@ -25,6 +26,12 @@ export default class Wick {
 
     // Init scene
     this.scene = new THREE.Scene();
+
+    // Init resizer
+    const resizer = new Resizer(this.container, this.camera, this.renderer);
+    resizer.onResize = () => {
+      this.render();
+    }
 
     // Set defaults
     this.setBackgroundColor('#171b26')
