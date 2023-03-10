@@ -15,7 +15,7 @@ export default class Wick {
   width: number;
   height: number;
   renderer: THREE.WebGLRenderer;
-  camera: THREE.PerspectiveCamera;
+  camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderLoop: Loop;
   debugSettings: DebugSettings;
@@ -49,16 +49,18 @@ export default class Wick {
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
     // Init camera
-    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 0.1, 1000);
+    this.camera = new THREE.OrthographicCamera(-4, 4, 4, -4, 0.1, 8);
+    this.camera.position.set(0, 0, 4);
+    this.camera.updateProjectionMatrix();
 
     // Init scene
     this.scene = new THREE.Scene();
 
     // Init resizer
-    const resizer = new Resizer(this.container, this.camera, this.renderer);
-    resizer.onResize = () => {
-      this.render();
-    }
+    //const resizer = new Resizer(this.container, this.camera, this.renderer);
+    //resizer.onResize = () => {
+    //  this.render();
+    //}
 
     // Set defaults
     this.setBackgroundColor('#171b26')

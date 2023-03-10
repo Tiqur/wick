@@ -1,11 +1,11 @@
-import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export default class Loop {
-  camera: PerspectiveCamera;
+  camera: OrthographicCamera;
   scene: Scene;
   renderer: WebGLRenderer;
   stats: Stats;
-  constructor(camera: PerspectiveCamera, scene: Scene, renderer: WebGLRenderer, stats: Stats) {
+  constructor(camera: OrthographicCamera, scene: Scene, renderer: WebGLRenderer, stats: Stats) {
     this.camera = camera;
     this.scene = scene;
     this.renderer = renderer;
