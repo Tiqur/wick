@@ -82,7 +82,13 @@ export default class Wick {
     // Init Debug GUI
     this.debugGui = new GUI();
     this._initDebugGUI();
-    this._updateDebugFeaturesStates();
+    this.showDebugMenu(this.showDebugGui);
+  }
+
+  // Hide ( don't disable )
+  _hideDebugFeatures() {
+    this.fpsCounter.disable();
+    this.gridHelper.disable();
   }
 
   // Set defaults
@@ -124,5 +130,13 @@ export default class Wick {
 
   showDebugMenu(value: boolean) {
     this.showDebugGui = value; 
+
+    if (value) {
+      this.debugGui.show();
+      this._updateDebugFeaturesStates();
+    } else {
+      this.debugGui.hide();
+      this._hideDebugFeatures();
+    }
   }
 }
