@@ -41,6 +41,6 @@ cameraFolder.open()
 addStaticCandles(wick.scene, debugCandles as OHLC[]);
 
 wick.camera.position.z = 5;
-wick.render();
+wick.start();
 
 

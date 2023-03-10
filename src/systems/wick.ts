@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import Resizer from './resizer';
+import Loop from './loop';
 
 export default class Wick {
   container: HTMLElement;
@@ -8,6 +9,7 @@ export default class Wick {
   renderer: THREE.WebGLRenderer;
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
+  renderLoop: Loop;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -40,6 +42,9 @@ export default class Wick {
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
+    // Init Render loop
+    this.renderLoop = new Loop(this.camera, this.scene, this.renderer);
+
     // Append to DOM
     this.container.append(this.renderer.domElement);
   }
@@ -51,5 +56,13 @@ export default class Wick {
   render() {
     // Render scene
     this.renderer.render(this.scene, this.camera);
+  }
+
+  start() {
+    this.renderLoop.start();
+  }
+
+  stop() {
+    this.renderLoop.stop();
   }
 }
