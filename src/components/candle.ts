@@ -2,11 +2,6 @@ import * as THREE from 'three';
 
 type OHLC = [number, number, number, number, number];
 
-
-function setCandleMatrix(matrix: THREE.Matrix4, position = new THREE.Vector3(0, 0, 0), quaternion = new THREE.Quaternion(), scale = new THREE.Vector3(1, 1, 1)) {
-  matrix.compose(position, quaternion, scale)
-}
-
 function getCandleColor(open: number, close: number) {
   return open < close ? '#d1d4dc' : '#3179f5';
 }
@@ -37,24 +32,63 @@ function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
 
 // These candles are static, meaning they are fast, but cannot change
 function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
+  // Candle count
   const count = ohlcData.length;
 
-  // Use as cache as to not create a new object every candle
-  const mutableCandleMatrix = new THREE.Matrix4();
+  // Cached values to be changed
+  const _body = new THREE.Object3D();
+  const _wick = new THREE.Object3D();
+  const _scale = new THREE.Vector3();
 
-  const geometry = new THREE.PlaneGeometry(1, 1);
-  const material = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const mesh = new THREE.InstancedMesh(geometry, material, count) ;
+  // Geometry
+  const body_geometry = new THREE.PlaneGeometry();
+  const body_material = new THREE.MeshBasicMaterial();
+  const wick_geometry = new THREE.PlaneGeometry();
+  const wick_material = new THREE.MeshBasicMaterial();
 
-  for (let i = 0; i < count; i++) {
-    setCandleMatrix(mutableCandleMatrix, new THREE.Vector3(Math.random()*1, Math.random()*1, Math.random()*1));
-    mesh.setMatrixAt(i, mutableCandleMatrix);
-  }
+  // Mesh
+  const bodyMesh = new THREE.InstancedMesh(body_geometry, body_material, count);
+  const wickMesh = new THREE.InstancedMesh(wick_geometry, wick_material, count);
 
-  // Makes it so 3js doesn't automatically update the transofrmation matrix
-  mesh.matrixAutoUpdate = false;
+  // Init group
+  const group = new THREE.Group();
 
-  scene.add(mesh);
+  const colorCache = new THREE.Color();
+  ohlcData.forEach((ohlc, index) => {
+    colorCache.set(getCandleColor(ohlc[1], ohlc[4]));
+
+    // Set body and wick color
+    bodyMesh.setColorAt(index, colorCache);
+    wickMesh.setColorAt(index, colorCache);
+
+    // ---- Body ----
+    // Set body height 
+    _scale.set(1, 2, 1);
+    _body.scale.copy(_scale);
+
+    // Set body location
+    _body.position.set(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1);
+    _body.updateMatrix();
+
+    // Update body mesh
+    bodyMesh.setMatrixAt(index, _body.matrix)
+
+    // ---- Wick ----
+    // Set wick height 
+    _scale.set(0.1, 4, 1);
+    _wick.scale.copy(_scale);
+
+    // Set body location
+    _wick.position.set(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1);
+    _wick.updateMatrix();
+
+    // Update wick mesh
+    wickMesh.setMatrixAt(index, _wick.matrix)
+  });
+
+  group.add(wickMesh);
+  group.add(bodyMesh);
+  scene.add(group);
 }
 
 export { addStaticCandles, addDynamicCandle, OHLC };
