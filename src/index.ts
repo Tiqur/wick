@@ -12,16 +12,16 @@ const wick = new Wick(container);
 wick.showDebugMenu(true);
 
 // Camera helper
-const helper = new THREE.CameraHelper(wick.camera);
+const helper = new THREE.CameraHelper(wick.renderLoop.camera);
 wick.scene.add(helper);
 
 // Orbit Controls
-new OrbitControls(wick.camera, wick.renderer.domElement);
+new OrbitControls(wick.renderLoop.camera, wick.renderer.domElement);
 
 //addDynamicCandle(wick.scene, debugCandles[0] as OHLC);
 addStaticCandles(wick.scene, debugCandles as OHLC[]);
 
-wick.camera.position.z = 5;
+wick.renderLoop.camera.position.z = 5;
 wick.start();
 
 

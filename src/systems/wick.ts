@@ -10,15 +10,15 @@ interface DebugSettings {
   FpsCounter: boolean
   GridHelper: boolean
   OrbitControls: boolean
-  CameraType: 'orthographic' | 'perspective'
+  CameraType: 'OrthographicCamera' | 'PerspectiveCamera'
 }
 
 export default class Wick {
   container: HTMLElement;
   width: number;
+  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
   height: number;
   renderer: THREE.WebGLRenderer;
-  camera: THREE.OrthographicCamera | THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderLoop: Loop;
   debugSettings: DebugSettings;
@@ -39,7 +39,7 @@ export default class Wick {
       FpsCounter: true,
       GridHelper: false,
       OrbitControls: false,
-      CameraType: 'orthographic'
+      CameraType: 'OrthographicCamera'
     }
   }
 
@@ -54,17 +54,12 @@ export default class Wick {
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
-    // Init camera
-    this.camera = new THREE.OrthographicCamera(-4, 4, 4, -4, 0.1, 8);
-    this.camera.position.set(0, 0, 4);
-    this.camera.updateProjectionMatrix();
-
     // Init scene
     this.scene = new THREE.Scene();
 
     // Set orthographic camera as default
-    this.combinedCamera = new CombinedCamera(this.scene);
-    this.combinedCamera.enableOrthographicCamera();
+    this.combinedCamera = new CombinedCamera();
+    this.camera = this.combinedCamera.getPerspectiveCamera();
 
 
     // Init resizer
@@ -104,11 +99,17 @@ export default class Wick {
     this.gridHelper.disable();
   }
 
-  // Set defaults
+  // Set features according to states
   _updateDebugFeaturesStates() {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
     this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
-    this.combinedCamera[this.debugSettings.CameraType ? 'enableOrthographicCamera' : 'enablePerspectiveCamera']();
+
+    if (this.debugSettings.CameraType != this.camera.type) {
+      const new_camera = this.combinedCamera[this.debugSettings.CameraType == 'OrthographicCamera' ? 'getOrthographicCamera' : 'getPerspectiveCamera']();
+      this.scene.remove(this.camera);
+      this.renderLoop.setCamera(new_camera);
+      this.camera = new_camera;
+    }
   }
 
   _initDebugGUI() {
@@ -121,7 +122,7 @@ export default class Wick {
       .onChange(() => {
         this._updateDebugFeaturesStates();
       })
-    debugFolder.add(this.debugSettings, 'CameraType', ["orthographic", "perspective"])
+    debugFolder.add(this.debugSettings, 'CameraType', ["OrthographicCamera", "PerspectiveCamera"])
       .onChange(() => {
         this._updateDebugFeaturesStates();
       })
@@ -131,11 +132,6 @@ export default class Wick {
 
   setBackgroundColor(color: string) {
     this.scene.background = new THREE.Color(color);
-  }
-
-  render() {
-    // Render scene
-    this.renderer.render(this.scene, this.camera);
   }
 
   start() {
