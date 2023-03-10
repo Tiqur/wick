@@ -25,7 +25,7 @@ function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
   const wick_mesh = new THREE.Mesh(wick_geometry, wick_material);
   group.add(wick_mesh);
 
-
+  // Add to scene
   scene.add(group);
 }
 
@@ -55,6 +55,8 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
 
   const colorCache = new THREE.Color();
   ohlcData.forEach((ohlc, index) => {
+
+    // Calculate candle color
     colorCache.set(getCandleColor(ohlc[1], ohlc[4]));
 
     // Set body and wick color
@@ -86,6 +88,7 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
     wickMesh.setMatrixAt(index, _wick.matrix)
   });
 
+  // Add all candles to scene
   group.add(wickMesh);
   group.add(bodyMesh);
   scene.add(group);
