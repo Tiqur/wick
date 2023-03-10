@@ -13,7 +13,7 @@ const container = document.getElementById("scene-container");
 const wick = new Wick(container);
 
 // Orbit Controls
-const controls = new OrbitControls(wick.camera, wick.renderer.domElement);
+new OrbitControls(wick.camera, wick.renderer.domElement);
 
 // Fps counter
 const stats = new Stats();
@@ -39,6 +39,8 @@ cameraFolder.open()
 
 //addDynamicCandle(wick.scene, debugCandles[0] as OHLC);
 addStaticCandles(wick.scene, debugCandles as OHLC[]);
+
+wick.scene.add(new THREE.GridHelper(10, 10));
 
 wick.camera.position.z = 5;
 wick.start();

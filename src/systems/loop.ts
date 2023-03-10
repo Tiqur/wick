@@ -1,4 +1,4 @@
-import { Clock, PerspectiveCamera, Renderer, Scene, WebGLRenderer } from 'three';
+import { Clock, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export default class Loop {
   camera: PerspectiveCamera;
