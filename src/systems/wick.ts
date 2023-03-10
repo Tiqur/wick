@@ -3,6 +3,8 @@ import Resizer from './resizer';
 import Loop from './loop';
 import Stats from 'stats.js';
 import {GUI} from 'dat.gui';
+import {GridHelper} from 'three';
+import FpsCounter from './fpsCounter';
 
 interface DebugSettings {
   FpsCounter: boolean
@@ -17,28 +19,22 @@ export default class Wick {
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderLoop: Loop;
-  stats: Stats;
   debugSettings: DebugSettings;
   debugGui: GUI;
   showDebugGui: boolean = false;
+  fpsCounter: FpsCounter;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.init();
   }
 
-  _initDebugSettings(): DebugSettings {
-
+  _initDebugSettings() {
     // Init default settings
-    const debugSettingsDefaults: DebugSettings = {
-      FpsCounter: false,
+    this.debugSettings = {
+      FpsCounter: true,
       GridHelper: false,
     }
-
-    // Enable / disable features based on default value
-    this._showFpsCounter(debugSettingsDefaults.FpsCounter);
-
-    return debugSettingsDefaults;
   }
 
   init() {
@@ -46,12 +42,8 @@ export default class Wick {
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
 
-    // Init stats gui 
-    this.stats = new Stats();
-    this.stats.showPanel(-1);
-
     // Set defaults and enable / disable features
-    this.debugSettings = this._initDebugSettings();
+    this._initDebugSettings();
 
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -75,31 +67,36 @@ export default class Wick {
     this.renderer.setSize(this.container.clientWidth, this.container.clientHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
+    // Init FPS counter
+    this.fpsCounter = new FpsCounter(this.container);
+
     // Init Render loop
-    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.stats);
+    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.stats);
 
     // Append to DOM
     this.container.append(this.renderer.domElement);
 
-    // Show Stats   
-    this.container.append(this.stats.dom);
-
     // Init Debug GUI
     this.debugGui = new GUI();
     this._initDebugGUI();
+    this._updateDebugFeaturesStates();
   }
 
-  _showFpsCounter(value: boolean) {
-      this.stats.showPanel(value ? 0 : -1);
+  // Set defaults
+  _updateDebugFeaturesStates() {
+    this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
   }
 
   _initDebugGUI() {
     const debugFolder = this.debugGui.addFolder('Debug')
     debugFolder.add(this.debugSettings, 'FpsCounter', this.debugSettings.FpsCounter)
       .onChange(() => {
-        this._showFpsCounter(this.debugSettings.FpsCounter);
+        this._updateDebugFeaturesStates();
       })
-    debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper);
+    debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper)
+      .onChange(() => {
+      })
+
     debugFolder.open()
   }
 
