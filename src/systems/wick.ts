@@ -1,10 +1,9 @@
 import * as THREE from 'three';
 import Resizer from './resizer';
 import Loop from './loop';
-import Stats from 'stats.js';
 import {GUI} from 'dat.gui';
-import {GridHelper} from 'three';
 import FpsCounter from './fpsCounter';
+import GridHelper from './gridHelper';
 
 interface DebugSettings {
   FpsCounter: boolean
@@ -23,6 +22,7 @@ export default class Wick {
   debugGui: GUI;
   showDebugGui: boolean = false;
   fpsCounter: FpsCounter;
+  gridHelper: GridHelper;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -70,6 +70,9 @@ export default class Wick {
     // Init FPS counter
     this.fpsCounter = new FpsCounter(this.container);
 
+    // Init Grid Helper
+    this.gridHelper = new GridHelper(this.scene);
+
     // Init Render loop
     this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.stats);
 
@@ -85,6 +88,7 @@ export default class Wick {
   // Set defaults
   _updateDebugFeaturesStates() {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
+    this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
   }
 
   _initDebugGUI() {
@@ -95,6 +99,7 @@ export default class Wick {
       })
     debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper)
       .onChange(() => {
+        this._updateDebugFeaturesStates();
       })
 
     debugFolder.open()
