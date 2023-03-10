@@ -18,7 +18,7 @@ export default class Wick {
     this.height = this.container.clientHeight;
     
     // Init renderer
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
     // Init camera
     this.camera = new THREE.PerspectiveCamera(50, this.width / this.height, 0.1, 1000);
