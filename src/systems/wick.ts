@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import Resizer from './resizer';
 import Loop from './loop';
+import Stats from 'stats.js';
 
 export default class Wick {
   container: HTMLElement;
@@ -10,6 +11,7 @@ export default class Wick {
   camera: THREE.PerspectiveCamera;
   scene: THREE.Scene;
   renderLoop: Loop;
+  stats: Stats;
 
   constructor(container: HTMLElement) {
     this.container = container;
@@ -19,7 +21,11 @@ export default class Wick {
   init() {
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
-    
+
+    // Init stats gui 
+    this.stats = new Stats();
+    this.stats.showPanel(0);
+
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
@@ -43,10 +49,13 @@ export default class Wick {
     this.renderer.setPixelRatio(window.devicePixelRatio)
 
     // Init Render loop
-    this.renderLoop = new Loop(this.camera, this.scene, this.renderer);
+    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.stats);
 
     // Append to DOM
     this.container.append(this.renderer.domElement);
+
+    // Show Stats   
+    this.container.append(this.stats.dom);
   }
 
   setBackgroundColor(color: string) {
