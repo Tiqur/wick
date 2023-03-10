@@ -2,6 +2,12 @@ import * as THREE from 'three';
 import Resizer from './resizer';
 import Loop from './loop';
 import Stats from 'stats.js';
+import {GUI} from 'dat.gui';
+
+interface DebugSettings {
+  FpsCounter: boolean
+  GridHelper: boolean
+}
 
 export default class Wick {
   container: HTMLElement;
@@ -12,19 +18,40 @@ export default class Wick {
   scene: THREE.Scene;
   renderLoop: Loop;
   stats: Stats;
+  debugSettings: DebugSettings;
+  debugGui: GUI;
+  showDebugGui: boolean = false;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.init();
   }
 
+  _initDebugSettings(): DebugSettings {
+
+    // Init default settings
+    const debugSettingsDefaults: DebugSettings = {
+      FpsCounter: false,
+      GridHelper: false,
+    }
+
+    // Enable / disable features based on default value
+    this._showFpsCounter(debugSettingsDefaults.FpsCounter);
+
+    return debugSettingsDefaults;
+  }
+
   init() {
+    // Set width and height to client width and client height
     this.width = this.container.clientWidth;
     this.height = this.container.clientHeight;
 
     // Init stats gui 
     this.stats = new Stats();
-    this.stats.showPanel(0);
+    this.stats.showPanel(-1);
+
+    // Set defaults and enable / disable features
+    this.debugSettings = this._initDebugSettings();
 
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -56,6 +83,24 @@ export default class Wick {
 
     // Show Stats   
     this.container.append(this.stats.dom);
+
+    // Init Debug GUI
+    this.debugGui = new GUI();
+    this._initDebugGUI();
+  }
+
+  _showFpsCounter(value: boolean) {
+      this.stats.showPanel(value ? 0 : -1);
+  }
+
+  _initDebugGUI() {
+    const debugFolder = this.debugGui.addFolder('Debug')
+    debugFolder.add(this.debugSettings, 'FpsCounter', this.debugSettings.FpsCounter)
+      .onChange(() => {
+        this._showFpsCounter(this.debugSettings.FpsCounter);
+      })
+    debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper);
+    debugFolder.open()
   }
 
   setBackgroundColor(color: string) {
@@ -73,5 +118,9 @@ export default class Wick {
 
   stop() {
     this.renderLoop.stop();
+  }
+
+  showDebugMenu(value: boolean) {
+    this.showDebugGui = value; 
   }
 }
