@@ -4,13 +4,15 @@ import Loop from './loop';
 import {GUI} from 'dat.gui';
 import FpsCounter from './fpsCounter';
 import GridHelper from './gridHelper';
+import CameraHelper from './cameraHelper';
 import { OrbitControls } from '../vendor/OrbitControls';
 
 interface DebugSettings {
-  FpsCounter: boolean
-  GridHelper: boolean
-  OrbitControls: boolean
-  CameraType: 'OrthographicCamera' | 'PerspectiveCamera'
+  FpsCounter: boolean;
+  GridHelper: boolean;
+  OrbitControls: boolean;
+  CameraHelper: boolean;
+  CameraType: 'OrthographicCamera' | 'PerspectiveCamera';
 }
 
 export default class Wick {
@@ -26,6 +28,7 @@ export default class Wick {
   showDebugGui: boolean = false;
   fpsCounter: FpsCounter;
   gridHelper: GridHelper;
+  cameraHelper: CameraHelper;
   oc: THREE.OrthographicCamera;
   pc: THREE.PerspectiveCamera;
 
@@ -40,6 +43,7 @@ export default class Wick {
       FpsCounter: true,
       GridHelper: false,
       OrbitControls: false,
+      CameraHelper: false,
       CameraType: 'OrthographicCamera'
     }
   }
@@ -58,12 +62,16 @@ export default class Wick {
     // Init scene
     this.scene = new THREE.Scene();
 
+    // Init cameras
     this.oc = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 100);
     this.pc = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
     ocControls.enableRotate = false;
     this.camera = this.oc;
+
+    // Init camera helper
+    this.cameraHelper = new CameraHelper(this.scene, this.oc);
 
     // Init resizer
     //const resizer = new Resizer(this.container, this.camera, this.renderer);
@@ -106,6 +114,7 @@ export default class Wick {
   _updateDebugFeaturesStates() {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
     this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
+    this.cameraHelper[this.debugSettings.CameraHelper ? 'enable' : 'disable']();
 
     // Swap camera types
     if (this.debugSettings.CameraType != this.camera.type) {
@@ -133,6 +142,10 @@ export default class Wick {
         this._updateDebugFeaturesStates();
       })
     debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper)
+      .onChange(() => {
+        this._updateDebugFeaturesStates();
+      })
+    debugFolder.add(this.debugSettings, 'CameraHelper', this.debugSettings.CameraHelper)
       .onChange(() => {
         this._updateDebugFeaturesStates();
       })
