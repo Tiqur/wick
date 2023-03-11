@@ -4,7 +4,7 @@ import Loop from './loop';
 import {GUI} from 'dat.gui';
 import FpsCounter from './fpsCounter';
 import GridHelper from './gridHelper';
-import CombinedCamera from './combinedCamera';
+import { OrbitControls } from '../vendor/OrbitControls';
 
 interface DebugSettings {
   FpsCounter: boolean
@@ -26,15 +26,16 @@ export default class Wick {
   showDebugGui: boolean = false;
   fpsCounter: FpsCounter;
   gridHelper: GridHelper;
-  combinedCamera: CombinedCamera;
+  oc: THREE.OrthographicCamera;
+  pc: THREE.PerspectiveCamera;
 
   constructor(container: HTMLElement) {
     this.container = container;
     this.init();
   }
 
+  // Init default settings
   _initDebugSettings() {
-    // Init default settings
     this.debugSettings = {
       FpsCounter: true,
       GridHelper: false,
@@ -57,10 +58,12 @@ export default class Wick {
     // Init scene
     this.scene = new THREE.Scene();
 
-    // Set orthographic camera as default
-    this.combinedCamera = new CombinedCamera();
-    this.camera = this.combinedCamera.getPerspectiveCamera();
-
+    this.oc = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 100);
+    this.pc = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
+    const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
+    ocControls.enableRotate = false;
+    this.camera = this.oc;
 
     // Init resizer
     //const resizer = new Resizer(this.container, this.camera, this.renderer);
@@ -104,12 +107,23 @@ export default class Wick {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
     this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
 
+    // Swap camera types
     if (this.debugSettings.CameraType != this.camera.type) {
-      const new_camera = this.combinedCamera[this.debugSettings.CameraType == 'OrthographicCamera' ? 'getOrthographicCamera' : 'getPerspectiveCamera']();
-      this.scene.remove(this.camera);
-      this.renderLoop.setCamera(new_camera);
-      this.camera = new_camera;
+      this.camera = this.camera == this.oc ? this.pc : this.oc;
+
+      // Set renderloop camera
+      this.renderLoop.setCamera(this.camera);
+      
+      // Position perspective camera to look at orthographic camera position
+      if (this.camera == this.pc) {
+        const pos = this.camera.position.copy(this.oc.position);
+        pos.x += 10;
+        pos.y += 10;
+        pos.z += 10;
+        this.camera.lookAt(this.oc.position.x, this.oc.position.y, this.oc.position.z);
+      }
     }
+    console.log(this.camera.type)
   }
 
   _initDebugGUI() {
