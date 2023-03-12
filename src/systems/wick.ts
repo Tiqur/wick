@@ -8,6 +8,7 @@ import CameraHelper from './cameraHelper';
 import { OrbitControls } from '../vendor/OrbitControls';
 import DebugSettings from './debugSettings';
 import ChartSettings from './chartSettings';
+import screenToNDC from './screenToNDC';
 
 export default class Wick {
   container: HTMLElement;
