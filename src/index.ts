@@ -6,7 +6,7 @@ import {OHLC} from './systems/ohlc';
 const container = document.getElementById("scene-container");
 
 // Init Wick class
-const wick = new Wick(container, { upColor: 'green' });
+const wick = new Wick(container);
 wick.showDebugMenu(true);
 
 // Render candles

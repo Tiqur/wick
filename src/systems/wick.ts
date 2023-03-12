@@ -226,6 +226,10 @@ export default class Wick {
   }
   
   setCandles(ohlcData: OHLC[]) {
+    const lookback = 10;
+    const lastXElements = ohlcData.slice(-lookback);
+    this.chartSettings.minPrice = Math.min(...lastXElements.map(e => e[3]));
+    this.chartSettings.maxPrice = Math.max(...lastXElements.map(e => e[2]));
     this._setDynamicCandle(ohlcData[ohlcData.length-1]);
     this._setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
   }
