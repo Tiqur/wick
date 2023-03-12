@@ -68,6 +68,7 @@ export default class Wick {
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
     ocControls.enableRotate = false;
+    ocControls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: null, RIGHT: null  };
     this.camera = this.oc;
 
     // Init camera helper
