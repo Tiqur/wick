@@ -6,14 +6,7 @@ import FpsCounter from './fpsCounter';
 import GridHelper from './gridHelper';
 import CameraHelper from './cameraHelper';
 import { OrbitControls } from '../vendor/OrbitControls';
-
-interface DebugSettings {
-  FpsCounter: boolean;
-  GridHelper: boolean;
-  OrbitControls: boolean;
-  CameraHelper: boolean;
-  CameraType: 'OrthographicCamera' | 'PerspectiveCamera';
-}
+import DebugSettings from './debugSettings';
 
 export default class Wick {
   container: HTMLElement;
@@ -69,6 +62,12 @@ export default class Wick {
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
     ocControls.enableRotate = false;
     ocControls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: null, RIGHT: null  };
+    
+    // Add wheel events
+    ocControls.addEventListener('wheel', e => {
+      console.log('wheel');
+    });
+
     this.camera = this.oc;
 
     // Init camera helper
