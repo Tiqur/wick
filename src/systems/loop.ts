@@ -1,16 +1,18 @@
-import { OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
+import { CameraHelper, OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export default class Loop {
   camera: OrthographicCamera | PerspectiveCamera;
   scene: Scene;
   renderer: WebGLRenderer;
   stats: Stats;
+  cameraHelper: CameraHelper;
 
-  constructor(camera: OrthographicCamera | PerspectiveCamera, scene: Scene, renderer: WebGLRenderer, stats: Stats) {
+  constructor(camera: OrthographicCamera | PerspectiveCamera, scene: Scene, renderer: WebGLRenderer, stats: Stats, cameraHelper: CameraHelper) {
     this.camera = camera;
     this.scene = scene;
     this.renderer = renderer;
     this.stats = stats;
+    this.cameraHelper = cameraHelper;
   }
 
   setCamera(camera: OrthographicCamera | PerspectiveCamera) {
@@ -21,6 +23,9 @@ export default class Loop {
     this.renderer.setAnimationLoop(() => {
       // Update FPS counter
       this.stats.update()
+
+      // Update CameraHelper position
+      this.cameraHelper.update()
 
       // Render scene
       this.renderer.render(this.scene, this.camera);

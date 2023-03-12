@@ -63,7 +63,7 @@ export default class Wick {
     this.scene = new THREE.Scene();
 
     // Init cameras
-    this.oc = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 100);
+    this.oc = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 1000);
     this.pc = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
@@ -93,7 +93,7 @@ export default class Wick {
     this.gridHelper = new GridHelper(this.scene);
 
     // Init Render loop
-    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.stats);
+    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.stats, this.cameraHelper.cameraHelper);
 
     // Append to DOM
     this.container.append(this.renderer.domElement);
@@ -122,7 +122,7 @@ export default class Wick {
 
       // Set renderloop camera
       this.renderLoop.setCamera(this.camera);
-      
+
       // Position perspective camera to look at orthographic camera position
       if (this.camera == this.pc) {
         const pos = this.camera.position.copy(this.oc.position);
@@ -132,7 +132,6 @@ export default class Wick {
         this.camera.lookAt(this.oc.position.x, this.oc.position.y, this.oc.position.z);
       }
     }
-    console.log(this.camera.type)
   }
 
   _initDebugGUI() {
