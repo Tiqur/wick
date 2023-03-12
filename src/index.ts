@@ -11,8 +11,6 @@ wick.showDebugMenu(true);
 
 // Render candles
 wick.setCandles(debugCandles as OHLC[]);
-
-wick.renderLoop.camera.position.z = 5;
 wick.start();
 
 

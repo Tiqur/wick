@@ -1,7 +1,7 @@
 import {PerspectiveCamera, WebGLRenderer} from "three";
 
 export default class Resizer {
-  container: HTMLElement;
+  private container: HTMLElement;
   camera: PerspectiveCamera;
   renderer: WebGLRenderer;
 

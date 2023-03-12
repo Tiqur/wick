@@ -2,12 +2,16 @@ import * as THREE from 'three';
 
 
 export default class CameraHelper {
-  scene: THREE.Scene;
-  cameraHelper: THREE.CameraHelper;
+  private scene: THREE.Scene;
+  private cameraHelper: THREE.CameraHelper;
 
   constructor(scene: THREE.Scene, camera: THREE.OrthographicCamera) {
     this.scene = scene;
     this.cameraHelper = new THREE.CameraHelper(camera);
+  }
+
+  getCameraHelper() {
+    return this.cameraHelper;
   }
 
   enable() {

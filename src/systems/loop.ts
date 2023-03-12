@@ -1,11 +1,11 @@
 import { CameraHelper, OrthographicCamera, PerspectiveCamera, Scene, WebGLRenderer } from 'three';
 
 export default class Loop {
-  camera: OrthographicCamera | PerspectiveCamera;
-  scene: Scene;
-  renderer: WebGLRenderer;
-  stats: Stats;
-  cameraHelper: CameraHelper;
+  private camera: OrthographicCamera | PerspectiveCamera;
+  private scene: Scene;
+  private renderer: WebGLRenderer;
+  private stats: Stats;
+  private cameraHelper: CameraHelper;
 
   constructor(camera: OrthographicCamera | PerspectiveCamera, scene: Scene, renderer: WebGLRenderer, stats: Stats, cameraHelper: CameraHelper) {
     this.camera = camera;

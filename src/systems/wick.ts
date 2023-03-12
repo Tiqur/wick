@@ -12,24 +12,24 @@ import priceToNDC from './priceToNDC';
 import {OHLC} from '../systems/ohlc';
 
 export default class Wick {
-  container: HTMLElement;
-  width: number;
-  camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
-  height: number;
-  renderer: THREE.WebGLRenderer;
-  scene: THREE.Scene;
-  renderLoop: Loop;
-  debugSettings: DebugSettings;
-  chartSettings: ChartSettings;
-  debugGui: GUI;
-  showDebugGui: boolean = false;
-  fpsCounter: FpsCounter;
-  gridHelper: GridHelper;
-  cameraHelper: CameraHelper;
-  oc: THREE.OrthographicCamera;
-  pc: THREE.PerspectiveCamera;
-  dynamicCandle: THREE.Group;
-  staticCandles: THREE.Group;
+  private container: HTMLElement;
+  private camera: THREE.PerspectiveCamera | THREE.OrthographicCamera;
+  private width: number;
+  private height: number;
+  private renderer: THREE.WebGLRenderer;
+  private scene: THREE.Scene;
+  private renderLoop: Loop;
+  private debugSettings: DebugSettings;
+  private chartSettings: ChartSettings;
+  private debugGui: GUI;
+  private showDebugGui: boolean = false;
+  private fpsCounter: FpsCounter;
+  private gridHelper: GridHelper;
+  private cameraHelper: CameraHelper;
+  private oc: THREE.OrthographicCamera;
+  private pc: THREE.PerspectiveCamera;
+  private dynamicCandle: THREE.Group;
+  private staticCandles: THREE.Group;
 
   constructor(container: HTMLElement, chartSettings?: ChartSettings) {
     this.container = container;
@@ -39,10 +39,10 @@ export default class Wick {
     this.height = this.container.clientHeight;
 
     // Set default debug settings
-    this._initDebugSettings();
+    this.initDebugSettings();
 
     // Init chart settings
-    this._initChartSettings(chartSettings);
+    this.initChartSettings(chartSettings);
 
 
 
@@ -50,13 +50,13 @@ export default class Wick {
   }
 
   // Init chart settings
-  _initChartSettings(chartSettings?: ChartSettings) {
+  private initChartSettings(chartSettings?: ChartSettings) {
     const DEFAULT_CHART_SETTINGS: ChartSettings = {
       upColor: '#d1d4dc',
       downColor: '#3179f5',
       minPrice: 5000,
       maxPrice: 10000,
-      coordinateDelta: 1,
+      coordinateDelta: 50,
       candleSpacing: 0.15,
       bodyWidth: 0.4,
       wickWidth: 0.02,
@@ -67,7 +67,7 @@ export default class Wick {
   }
 
   // Init default settings
-  _initDebugSettings() {
+  private initDebugSettings() {
     this.debugSettings = {
       FpsCounter: true,
       GridHelper: false,
@@ -77,7 +77,7 @@ export default class Wick {
     }
   }
 
-  init() {
+  private init() {
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
@@ -87,6 +87,7 @@ export default class Wick {
     // Init cameras
     this.oc = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
     this.pc = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    this.oc.position.setZ(10);
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
     ocControls.enableRotate = false;
@@ -123,21 +124,21 @@ export default class Wick {
     this.gridHelper = new GridHelper(this.scene);
 
     // Init Render loop
-    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.stats, this.cameraHelper.cameraHelper);
+    this.renderLoop = new Loop(this.camera, this.scene, this.renderer, this.fpsCounter.getStats(), this.cameraHelper.getCameraHelper());
 
     // Append to DOM
     this.container.append(this.renderer.domElement);
 
     // Init Debug GUI
     this.debugGui = new GUI();
-    this._initDebugGUI();
+    this.initDebugGUI();
     this.showDebugMenu(this.showDebugGui);
 
     // Change cursor to crosshair if over canvas
-    this._initCursorChangeEventListeners();
+    this.initCursorChangeEventListeners();
   }
 
-  _initCursorChangeEventListeners() {
+  private initCursorChangeEventListeners() {
     this.container.addEventListener('mousemove', () => {
       this.renderer.domElement.style.cursor = 'crosshair';
     })
@@ -150,13 +151,13 @@ export default class Wick {
   }
 
   // Hide ( don't disable )
-  _hideDebugFeatures() {
+  private hideDebugFeatures() {
     this.fpsCounter.disable();
     this.gridHelper.disable();
   }
 
   // Set features according to states
-  _updateDebugFeaturesStates() {
+  private updateDebugFeaturesStates() {
     this.fpsCounter[this.debugSettings.FpsCounter ? 'enable' : 'disable']();
     this.gridHelper[this.debugSettings.GridHelper ? 'enable' : 'disable']();
     this.cameraHelper[this.debugSettings.CameraHelper ? 'enable' : 'disable']();
@@ -179,23 +180,23 @@ export default class Wick {
     }
   }
 
-  _initDebugGUI() {
+  private initDebugGUI() {
     const debugFolder = this.debugGui.addFolder('Debug')
     debugFolder.add(this.debugSettings, 'FpsCounter', this.debugSettings.FpsCounter)
       .onChange(() => {
-        this._updateDebugFeaturesStates();
+        this.updateDebugFeaturesStates();
       })
     debugFolder.add(this.debugSettings, 'GridHelper', this.debugSettings.GridHelper)
       .onChange(() => {
-        this._updateDebugFeaturesStates();
+        this.updateDebugFeaturesStates();
       })
     debugFolder.add(this.debugSettings, 'CameraHelper', this.debugSettings.CameraHelper)
       .onChange(() => {
-        this._updateDebugFeaturesStates();
+        this.updateDebugFeaturesStates();
       })
     debugFolder.add(this.debugSettings, 'CameraType', ["OrthographicCamera", "PerspectiveCamera"])
       .onChange(() => {
-        this._updateDebugFeaturesStates();
+        this.updateDebugFeaturesStates();
       })
 
     debugFolder.open()
@@ -218,10 +219,10 @@ export default class Wick {
 
     if (value) {
       this.debugGui.show();
-      this._updateDebugFeaturesStates();
+      this.updateDebugFeaturesStates();
     } else {
       this.debugGui.hide();
-      this._hideDebugFeatures();
+      this.hideDebugFeatures();
     }
   }
   
@@ -230,12 +231,12 @@ export default class Wick {
     const lastXElements = ohlcData.slice(-lookback);
     this.chartSettings.minPrice = Math.min(...lastXElements.map(e => e[3]));
     this.chartSettings.maxPrice = Math.max(...lastXElements.map(e => e[2]));
-    this._setDynamicCandle(ohlcData[ohlcData.length-1]);
-    this._setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
+    this.setDynamicCandle(ohlcData[ohlcData.length-2]);
+    this.setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
   }
 
   // These candles are static, meaning they are fast, but cannot change
-  _setStaticCandles(ohlcData: OHLC[]) {
+  private setStaticCandles(ohlcData: OHLC[]) {
     this.scene.remove(this.staticCandles);
 
     // Candle count
@@ -314,7 +315,7 @@ export default class Wick {
   }
 
   // The niave method is good for very dynamic objects, but try not to use it too much
-  _setDynamicCandle(ohlc: OHLC) {
+  private setDynamicCandle(ohlc: OHLC) {
     this.scene.remove(this.dynamicCandle);
 
     // Contains entire candle
