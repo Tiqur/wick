@@ -127,6 +127,21 @@ export default class Wick {
     this.debugGui = new GUI();
     this._initDebugGUI();
     this.showDebugMenu(this.showDebugGui);
+
+    // Change cursor to crosshair if over canvas
+    this._initCursorChangeEventListeners();
+  }
+
+  _initCursorChangeEventListeners() {
+    this.container.addEventListener('mousemove', () => {
+      this.renderer.domElement.style.cursor = 'crosshair';
+    })
+    this.container.addEventListener('mouseenter', () => {
+      this.renderer.domElement.style.cursor = 'crosshair';
+    })
+    this.container.addEventListener('mouseleave', () => {
+      this.renderer.domElement.style.cursor = 'initial';
+    })
   }
 
   // Hide ( don't disable )
