@@ -30,6 +30,7 @@ export default class Wick {
   private pc: THREE.PerspectiveCamera;
   private dynamicCandle: THREE.Group;
   private staticCandles: THREE.Group;
+  private ohlcData: OHLC[];
 
   constructor(container: HTMLElement, chartSettings?: ChartSettings) {
     this.container = container;
@@ -56,7 +57,7 @@ export default class Wick {
       downColor: '#3179f5',
       minPrice: 5000,
       maxPrice: 10000,
-      coordinateDelta: 50,
+      coordinateDelta: 5,
       candleSpacing: 0.15,
       bodyWidth: 0.4,
       wickWidth: 0.02,
@@ -91,12 +92,28 @@ export default class Wick {
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);
     ocControls.enableRotate = false;
+    ocControls.enableZoom = false;
     ocControls.mouseButtons = { LEFT: THREE.MOUSE.PAN, MIDDLE: null, RIGHT: null  };
     
     // Add wheel events
-    ocControls.addEventListener('wheel', e => {
-      const scrollAmount = e.deltaY < 0 ? 1 : -1;
-      this.chartSettings.coordinateDelta += scrollAmount;
+    this.renderer.domElement.addEventListener('wheel', e => {
+
+      if (e.shiftKey && e.ctrlKey) { // Zoom
+        const zoomAmount = e.deltaY < 0 ? 1.05 : 0.95;
+        this.oc.zoom = Math.min(this.oc.zoom*zoomAmount, 5);
+        console.log(this.oc.zoom)
+        this.oc.updateProjectionMatrix();
+      } else if (e.shiftKey) { // Price scrolling
+        const scrollAmount = e.deltaY < 0 ? 1.2 : 0.8;
+        this.chartSettings.coordinateDelta = Math.max(this.chartSettings.coordinateDelta*scrollAmount, 0);
+        this.setCandles(this.ohlcData);
+      } else { // Scroll candle width
+        const scrollAmount = e.deltaY < 0 ? 1.05 : 0.95;
+        this.chartSettings.bodyWidth = Math.max(this.chartSettings.bodyWidth*scrollAmount, 0.002);
+        this.chartSettings.wickWidth = Math.max(this.chartSettings.wickWidth*scrollAmount, 0.0001);
+        this.chartSettings.candleSpacing = Math.max(this.chartSettings.candleSpacing*scrollAmount, 0.0001);
+        this.setCandles(this.ohlcData);
+      }
     });
 
     this.camera = this.oc;
@@ -227,6 +244,7 @@ export default class Wick {
   }
   
   setCandles(ohlcData: OHLC[]) {
+    this.ohlcData = ohlcData;
     const lookback = 10;
     const lastXElements = ohlcData.slice(-lookback);
     this.chartSettings.minPrice = Math.min(...lastXElements.map(e => e[3]));
