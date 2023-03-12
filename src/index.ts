@@ -21,8 +21,8 @@ const chartSettings: ChartSettings = {
   wickWidth: 0.02
 }
 
-addDynamicCandle(wick.scene, debugCandles[0] as OHLC, chartSettings);
-//addStaticCandles(wick.scene, debugCandles as OHLC[]);
+//addDynamicCandle(wick.scene, debugCandles[0] as OHLC, chartSettings);
+addStaticCandles(wick.scene, debugCandles as OHLC[], chartSettings);
 
 wick.renderLoop.camera.position.z = 5;
 wick.start();

@@ -64,11 +64,16 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[], settings: ChartS
   const group = new THREE.Group();
 
   const colorCache = new THREE.Color();
-  ohlcData.forEach((ohlc, index) => {
+  ohlcData.reverse().forEach((ohlc, index) => {
+
+    // Calculate candle body and height
+    const body_height = Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
+    const wick_height = Math.abs(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[3], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
     const candle_type = ohlc[1] < ohlc[4];
     const candle_color = candle_type ? settings.upColor : settings.downColor;
+  
 
-    // Calculate candle color
+    // Set candle color
     colorCache.set(candle_color);
 
     // Set body and wick color
@@ -78,11 +83,12 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[], settings: ChartS
 
     // ---- Body ----
     // Set body height 
-    _scale.set(1, 2, 1);
+    _scale.set(settings.bodyWidth, body_height, 1);
     _body.scale.copy(_scale);
 
     // Set body location
-    _body.position.set(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1);
+    _body.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta)+body_height/2)
+    _body.position.setX(-index*(settings.candleSpacing+settings.bodyWidth))
     _body.updateMatrix();
 
     // Update body mesh
@@ -91,11 +97,12 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[], settings: ChartS
 
     // ---- Wick ----
     // Set wick height 
-    _scale.set(0.1, 4, 1);
+    _scale.set(settings.wickWidth, wick_height, 1);
     _wick.scale.copy(_scale);
 
-    // Set body location
-    _wick.position.set(Math.random()*2-1, Math.random()*2-1, Math.random()*2-1);
+    // Set wick location
+    _wick.position.setY(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-wick_height/2)
+    _wick.position.setX(-index*(settings.candleSpacing+settings.bodyWidth))
     _wick.updateMatrix();
 
     // Update wick mesh
