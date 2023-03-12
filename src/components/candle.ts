@@ -1,45 +1,38 @@
 import * as THREE from 'three';
 import priceToNDC from '../systems/priceToNDC';
+import ChartSettings from '../systems/chartSettings';
 
 type OHLC = [number, number, number, number, number];
 
-function getCandleColor(open: number, close: number) {
-  return open < close ? '#d1d4dc' : '#3179f5';
-}
-
 
 // The niave method is good for very dynamic objects, but try not to use it too much
-function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
+function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC, settings: ChartSettings) {
 
   // Contains entire candle
   const group = new THREE.Group();
 
-
-  const minPrice = 10000;
-  const maxPrice = 10500;
-  const coordinate_delta = 1;
   const index = 0;
-  const candle_spacing = 0.2;
-  const candle_width = 0.4;
-  const wick_width = 0.02;
-  const body_height = Math.abs(priceToNDC(ohlc[1], minPrice, maxPrice, coordinate_delta)-priceToNDC(ohlc[4], minPrice, maxPrice, coordinate_delta));
-  const wick_height = Math.abs(priceToNDC(ohlc[2], minPrice, maxPrice, coordinate_delta)-priceToNDC(ohlc[3], minPrice, maxPrice, coordinate_delta));
+
+  // Calculate candle body and height
+  const body_height = Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
+  const wick_height = Math.abs(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[3], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
   const candle_type = ohlc[1] < ohlc[4];
+  const candle_color = candle_type ? settings.upColor : settings.downColor;
   
   // Candle body
-  const body_geometry = new THREE.PlaneGeometry(candle_width, body_height);
-  const body_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
+  const body_geometry = new THREE.PlaneGeometry(settings.bodyWidth, body_height);
+  const body_material = new THREE.MeshBasicMaterial({ color: candle_color });
   const body_mesh = new THREE.Mesh(body_geometry, body_material);
-  body_mesh.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], minPrice, maxPrice, coordinate_delta)+body_height/2)
-  body_mesh.position.setX(-index*(candle_spacing+candle_width))
+  body_mesh.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta)+body_height/2)
+  body_mesh.position.setX(-index*(settings.candleSpacing+settings.bodyWidth))
   group.add(body_mesh);
 
   // Candle wick
-  const wick_geometry = new THREE.PlaneGeometry(wick_width, wick_height);
-  const wick_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
+  const wick_geometry = new THREE.PlaneGeometry(settings.wickWidth, wick_height);
+  const wick_material = new THREE.MeshBasicMaterial({ color: candle_color });
   const wick_mesh = new THREE.Mesh(wick_geometry, wick_material);
-  wick_mesh.position.setY(priceToNDC(ohlc[2], minPrice, maxPrice, coordinate_delta)-wick_height/2)
-  wick_mesh.position.setX(-index*(candle_spacing+candle_width))
+  wick_mesh.position.setY(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-wick_height/2)
+  wick_mesh.position.setX(-index*(settings.candleSpacing+settings.bodyWidth))
   group.add(wick_mesh);
 
   // Add to scene
@@ -48,7 +41,7 @@ function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
 
 
 // These candles are static, meaning they are fast, but cannot change
-function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
+function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[], settings: ChartSettings) {
   // Candle count
   const count = ohlcData.length;
 
@@ -72,9 +65,11 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
 
   const colorCache = new THREE.Color();
   ohlcData.forEach((ohlc, index) => {
+    const candle_type = ohlc[1] < ohlc[4];
+    const candle_color = candle_type ? settings.upColor : settings.downColor;
 
     // Calculate candle color
-    colorCache.set(getCandleColor(ohlc[1], ohlc[4]));
+    colorCache.set(candle_color);
 
     // Set body and wick color
     bodyMesh.setColorAt(index, colorCache);
