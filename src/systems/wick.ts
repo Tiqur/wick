@@ -7,6 +7,7 @@ import GridHelper from './gridHelper';
 import CameraHelper from './cameraHelper';
 import { OrbitControls } from '../vendor/OrbitControls';
 import DebugSettings from './debugSettings';
+import ChartSettings from './chartSettings';
 
 export default class Wick {
   container: HTMLElement;
@@ -17,6 +18,7 @@ export default class Wick {
   scene: THREE.Scene;
   renderLoop: Loop;
   debugSettings: DebugSettings;
+  chartSettings: ChartSettings;
   debugGui: GUI;
   showDebugGui: boolean = false;
   fpsCounter: FpsCounter;
@@ -25,9 +27,39 @@ export default class Wick {
   oc: THREE.OrthographicCamera;
   pc: THREE.PerspectiveCamera;
 
-  constructor(container: HTMLElement) {
+  constructor(container: HTMLElement, chartSettings?: ChartSettings) {
     this.container = container;
+
+    // Set width and height to client width and client height
+    this.width = this.container.clientWidth;
+    this.height = this.container.clientHeight;
+
+    // Set default debug settings
+    this._initDebugSettings();
+
+    // Init chart settings
+    this._initChartSettings(chartSettings);
+
+
+
     this.init();
+  }
+
+  // Init chart settings
+  _initChartSettings(chartSettings?: ChartSettings) {
+    const DEFAULT_CHART_SETTINGS: ChartSettings = {
+      upColor: '#d1d4dc',
+      downColor: '#3179f5',
+      minPrice: 5000,
+      maxPrice: 10000,
+      coordinateDelta: 1,
+      candleSpacing: 0.15,
+      bodyWidth: 0.4,
+      wickWidth: 0.02,
+      minHeight: 0.02
+    }
+
+    this.chartSettings = Object.assign({}, DEFAULT_CHART_SETTINGS, chartSettings);
   }
 
   // Init default settings
@@ -42,13 +74,6 @@ export default class Wick {
   }
 
   init() {
-    // Set width and height to client width and client height
-    this.width = this.container.clientWidth;
-    this.height = this.container.clientHeight;
-
-    // Set defaults and enable / disable features
-    this._initDebugSettings();
-
     // Init renderer
     this.renderer = new THREE.WebGLRenderer({ antialias: true });
 
