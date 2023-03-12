@@ -10,8 +10,8 @@ const container = document.getElementById("scene-container");
 const wick = new Wick(container);
 wick.showDebugMenu(true);
 
-//addDynamicCandle(wick.scene, debugCandles[0] as OHLC);
-addStaticCandles(wick.scene, debugCandles as OHLC[]);
+addDynamicCandle(wick.scene, debugCandles[0] as OHLC);
+//addStaticCandles(wick.scene, debugCandles as OHLC[]);
 
 wick.renderLoop.camera.position.z = 5;
 wick.start();

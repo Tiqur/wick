@@ -6,7 +6,8 @@ export default class GridHelper {
   scene: THREE.Scene;
 
   constructor(scene: THREE.Scene) {
-    this.gridHelper = new THREE.GridHelper(100);
+    this.gridHelper = new THREE.GridHelper(10, 10);
+    this.gridHelper.position.setY(-1);
     this.scene = scene;
   }
 
