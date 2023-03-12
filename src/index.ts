@@ -1,7 +1,6 @@
 import Wick from './systems/wick';
-import { addStaticCandles, addDynamicCandle, OHLC } from './components/candle';
 import debugCandles from './assets/debugCandles.json';
-import ChartSettings from './systems/chartSettings';
+import {OHLC} from './systems/ohlc';
 
 // Reference to container element
 const container = document.getElementById("scene-container");
@@ -11,8 +10,7 @@ const wick = new Wick(container, { upColor: 'green' });
 wick.showDebugMenu(true);
 
 // Render candles
-addStaticCandles(wick.scene, debugCandles as OHLC[], wick.chartSettings);
-//addDynamicCandle(wick.scene, debugCandles[0] as OHLC, chartSettings);
+wick.setCandles(debugCandles as OHLC[]);
 
 wick.renderLoop.camera.position.z = 5;
 wick.start();

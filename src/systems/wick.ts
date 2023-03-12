@@ -8,7 +8,8 @@ import CameraHelper from './cameraHelper';
 import { OrbitControls } from '../vendor/OrbitControls';
 import DebugSettings from './debugSettings';
 import ChartSettings from './chartSettings';
-import screenToNDC from './screenToNDC';
+import priceToNDC from './priceToNDC';
+import {OHLC} from '../systems/ohlc';
 
 export default class Wick {
   container: HTMLElement;
@@ -27,6 +28,8 @@ export default class Wick {
   cameraHelper: CameraHelper;
   oc: THREE.OrthographicCamera;
   pc: THREE.PerspectiveCamera;
+  dynamicCandle: THREE.Group;
+  staticCandles: THREE.Group;
 
   constructor(container: HTMLElement, chartSettings?: ChartSettings) {
     this.container = container;
@@ -91,7 +94,8 @@ export default class Wick {
     
     // Add wheel events
     ocControls.addEventListener('wheel', e => {
-      console.log('wheel');
+      const scrollAmount = e.deltaY < 0 ? 1 : -1;
+      this.chartSettings.coordinateDelta += scrollAmount;
     });
 
     this.camera = this.oc;
@@ -219,5 +223,126 @@ export default class Wick {
       this.debugGui.hide();
       this._hideDebugFeatures();
     }
+  }
+  
+  setCandles(ohlcData: OHLC[]) {
+    this._setDynamicCandle(ohlcData[ohlcData.length-1]);
+    this._setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
+  }
+
+  // These candles are static, meaning they are fast, but cannot change
+  _setStaticCandles(ohlcData: OHLC[]) {
+    this.scene.remove(this.staticCandles);
+
+    // Candle count
+    const count = ohlcData.length;
+
+    // Cached values to be changed
+    const _body = new THREE.Object3D();
+    const _wick = new THREE.Object3D();
+    const _scale = new THREE.Vector3();
+
+    // Geometry
+    const body_geometry = new THREE.PlaneGeometry();
+    const body_material = new THREE.MeshBasicMaterial();
+    const wick_geometry = new THREE.PlaneGeometry();
+    const wick_material = new THREE.MeshBasicMaterial();
+
+    // Mesh
+    const bodyMesh = new THREE.InstancedMesh(body_geometry, body_material, count);
+    const wickMesh = new THREE.InstancedMesh(wick_geometry, wick_material, count);
+
+    // Init group
+    const group = new THREE.Group();
+
+    const colorCache = new THREE.Color();
+    ohlcData.reverse().forEach((ohlc, index) => {
+
+      // Calculate candle body and height
+      const body_height = Math.max(Math.abs(priceToNDC(ohlc[1], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-priceToNDC(ohlc[4], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)), this.chartSettings.minHeight);
+      const wick_height = Math.abs(priceToNDC(ohlc[2], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-priceToNDC(ohlc[3], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta));
+      const candle_type = ohlc[1] < ohlc[4];
+      const candle_color = candle_type ? this.chartSettings.upColor : this.chartSettings.downColor;
+    
+
+      // Set candle color
+      colorCache.set(candle_color);
+
+      // Set body and wick color
+      bodyMesh.setColorAt(index, colorCache);
+      wickMesh.setColorAt(index, colorCache);
+
+
+      // ---- Body ----
+      // Set body height 
+      _scale.set(this.chartSettings.bodyWidth, body_height, 1);
+      _body.scale.copy(_scale);
+
+      // Set body location
+      _body.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)+body_height/2)
+      _body.position.setX((-index-1)*(this.chartSettings.candleSpacing+this.chartSettings.bodyWidth))
+      _body.updateMatrix();
+
+      // Update body mesh
+      bodyMesh.setMatrixAt(index, _body.matrix)
+
+
+      // ---- Wick ----
+      // Set wick height 
+      _scale.set(this.chartSettings.wickWidth, wick_height, 1);
+      _wick.scale.copy(_scale);
+
+      // Set wick location
+      _wick.position.setY(priceToNDC(ohlc[2], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-wick_height/2)
+      _wick.position.setX((-index-1)*(this.chartSettings.candleSpacing+this.chartSettings.bodyWidth))
+      _wick.updateMatrix();
+
+      // Update wick mesh
+      wickMesh.setMatrixAt(index, _wick.matrix)
+    });
+
+    // Add all candles to scene
+    group.add(wickMesh);
+    group.add(bodyMesh);
+    this.scene.add(group);
+
+    this.staticCandles = group;
+  }
+
+  // The niave method is good for very dynamic objects, but try not to use it too much
+  _setDynamicCandle(ohlc: OHLC) {
+    this.scene.remove(this.dynamicCandle);
+
+    // Contains entire candle
+    const group = new THREE.Group();
+
+    const index = 0;
+
+    // Calculate candle body and height
+    const body_height = Math.max(Math.abs(priceToNDC(ohlc[1], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-priceToNDC(ohlc[4], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)), this.chartSettings.minHeight);
+    const wick_height = Math.abs(priceToNDC(ohlc[2], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-priceToNDC(ohlc[3], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta));
+    const candle_type = ohlc[1] < ohlc[4];
+    const candle_color = candle_type ? this.chartSettings.upColor : this.chartSettings.downColor;
+    
+    // Candle body
+    const body_geometry = new THREE.PlaneGeometry(this.chartSettings.bodyWidth, body_height);
+    const body_material = new THREE.MeshBasicMaterial({ color: 'red' });
+    const body_mesh = new THREE.Mesh(body_geometry, body_material);
+    body_mesh.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)+body_height/2)
+    body_mesh.position.setX(-index*(this.chartSettings.candleSpacing+this.chartSettings.bodyWidth))
+    group.add(body_mesh);
+
+    // Candle wick
+    const wick_geometry = new THREE.PlaneGeometry(this.chartSettings.wickWidth, wick_height);
+    const wick_material = new THREE.MeshBasicMaterial({ color: 'red' });
+    const wick_mesh = new THREE.Mesh(wick_geometry, wick_material);
+    wick_mesh.position.setY(priceToNDC(ohlc[2], this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta)-wick_height/2)
+    wick_mesh.position.setX(-index*(this.chartSettings.candleSpacing+this.chartSettings.bodyWidth))
+    group.add(wick_mesh);
+
+    // Add to scene
+    this.scene.add(group);
+
+    this.dynamicCandle = group;
   }
 }
