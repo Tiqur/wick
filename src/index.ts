@@ -14,15 +14,17 @@ const chartSettings: ChartSettings = {
   upColor: '#d1d4dc',
   downColor: '#3179f5',
   minPrice: 10000,
-  maxPrice: 10500,
-  coordinateDelta: 1,
+  maxPrice: 10100,
+  coordinateDelta: 8,
   candleSpacing: 0.2,
   bodyWidth: 0.4,
-  wickWidth: 0.02
+  wickWidth: 0.02,
+  minHeight: 0.02
 }
 
-//addDynamicCandle(wick.scene, debugCandles[0] as OHLC, chartSettings);
+// Render candles
 addStaticCandles(wick.scene, debugCandles as OHLC[], chartSettings);
+//addDynamicCandle(wick.scene, debugCandles[0] as OHLC, chartSettings);
 
 wick.renderLoop.camera.position.z = 5;
 wick.start();

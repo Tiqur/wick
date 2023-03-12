@@ -6,6 +6,7 @@ export default interface ChartSettings {
   coordinateDelta: number,
   bodyWidth: number,
   wickWidth: number,
-  candleSpacing: number
+  candleSpacing: number,
+  minHeight: number
 }
 

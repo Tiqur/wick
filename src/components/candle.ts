@@ -14,7 +14,7 @@ function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC, settings: ChartSetting
   const index = 0;
 
   // Calculate candle body and height
-  const body_height = Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
+  const body_height = Math.max(Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta)), settings.minHeight);
   const wick_height = Math.abs(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[3], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
   const candle_type = ohlc[1] < ohlc[4];
   const candle_color = candle_type ? settings.upColor : settings.downColor;
@@ -67,7 +67,7 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[], settings: ChartS
   ohlcData.reverse().forEach((ohlc, index) => {
 
     // Calculate candle body and height
-    const body_height = Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
+    const body_height = Math.max(Math.abs(priceToNDC(ohlc[1], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[4], settings.minPrice, settings.maxPrice, settings.coordinateDelta)), settings.minHeight);
     const wick_height = Math.abs(priceToNDC(ohlc[2], settings.minPrice, settings.maxPrice, settings.coordinateDelta)-priceToNDC(ohlc[3], settings.minPrice, settings.maxPrice, settings.coordinateDelta));
     const candle_type = ohlc[1] < ohlc[4];
     const candle_color = candle_type ? settings.upColor : settings.downColor;
