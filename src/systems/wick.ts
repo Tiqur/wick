@@ -63,7 +63,7 @@ export default class Wick {
     this.scene = new THREE.Scene();
 
     // Init cameras
-    this.oc = new THREE.OrthographicCamera(-2, 2, 2, -2, 0.1, 1000);
+    this.oc = new THREE.OrthographicCamera(-1, 1, 1, -1, 0.1, 1000);
     this.pc = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
     const ocControls = new OrbitControls(this.oc, this.renderer.domElement);
     const pcControls = new OrbitControls(this.pc, this.renderer.domElement);

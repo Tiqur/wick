@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import priceToNDC from '../systems/priceToNDC';
 
 type OHLC = [number, number, number, number, number];
 
@@ -12,17 +13,28 @@ function addDynamicCandle(scene: THREE.Scene, ohlc: OHLC) {
 
   // Contains entire candle
   const group = new THREE.Group();
+
+
+  const minPrice = 10000;
+  const maxPrice = 10500;
+  const coordinate_delta = 1;
+  const candle_spacing = 0.2;
+  const body_height = Math.abs(priceToNDC(ohlc[1], minPrice, maxPrice, coordinate_delta)-priceToNDC(ohlc[4], minPrice, maxPrice, coordinate_delta));
+  const wick_height = Math.abs(priceToNDC(ohlc[2], minPrice, maxPrice, coordinate_delta)-priceToNDC(ohlc[3], minPrice, maxPrice, coordinate_delta));
+  const candle_type = ohlc[1] < ohlc[4];
   
   // Candle body
-  const body_geometry = new THREE.PlaneGeometry(1, 2);
+  const body_geometry = new THREE.PlaneGeometry(0.2, body_height);
   const body_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
   const body_mesh = new THREE.Mesh(body_geometry, body_material);
+  body_mesh.position.setY(priceToNDC(candle_type ? ohlc[1] : ohlc[4], minPrice, maxPrice, coordinate_delta)+body_height/2)
   group.add(body_mesh);
 
   // Candle wick
-  const wick_geometry = new THREE.PlaneGeometry(0.1, 3);
+  const wick_geometry = new THREE.PlaneGeometry(0.02, wick_height);
   const wick_material = new THREE.MeshBasicMaterial({ color: getCandleColor(ohlc[1], ohlc[4]) });
   const wick_mesh = new THREE.Mesh(wick_geometry, wick_material);
+  wick_mesh.position.setY(priceToNDC(ohlc[2], minPrice, maxPrice, coordinate_delta)-wick_height/2)
   group.add(wick_mesh);
 
   // Add to scene
@@ -63,6 +75,7 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
     bodyMesh.setColorAt(index, colorCache);
     wickMesh.setColorAt(index, colorCache);
 
+
     // ---- Body ----
     // Set body height 
     _scale.set(1, 2, 1);
@@ -74,6 +87,7 @@ function addStaticCandles(scene: THREE.Scene, ohlcData: OHLC[]) {
 
     // Update body mesh
     bodyMesh.setMatrixAt(index, _body.matrix)
+
 
     // ---- Wick ----
     // Set wick height 
