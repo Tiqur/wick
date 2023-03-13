@@ -9,7 +9,9 @@ import { OrbitControls } from '../vendor/OrbitControls';
 import DebugSettings from './debugSettings';
 import ChartSettings from './chartSettings';
 import priceToNDC from './priceToNDC';
-import {OHLC} from '../systems/ohlc';
+import {OHLC} from './ohlc';
+import screenToWorldCoords from './screenToNDC';
+import coordsToPrice from './coordsToPrice';
 
 export default class Wick {
   private container: HTMLElement;
@@ -57,7 +59,7 @@ export default class Wick {
       downColor: '#3179f5',
       minPrice: 5000,
       maxPrice: 10000,
-      coordinateDelta: 5,
+      coordinateDelta: 1,
       candleSpacing: 0.15,
       bodyWidth: 0.4,
       wickWidth: 0.02,
@@ -156,8 +158,11 @@ export default class Wick {
   }
 
   private initCursorChangeEventListeners() {
-    this.container.addEventListener('mousemove', () => {
+    this.container.addEventListener('mousemove', e => {
       this.renderer.domElement.style.cursor = 'crosshair';
+      const worldCoords = screenToWorldCoords(new THREE.Vector2(e.clientX, e.clientY), this.oc, this.width, this.height);
+      const screenPrice = coordsToPrice(worldCoords.y, this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta);
+      console.log(screenPrice);
     })
     this.container.addEventListener('mouseenter', () => {
       this.renderer.domElement.style.cursor = 'crosshair';
@@ -249,8 +254,25 @@ export default class Wick {
     const lastXElements = ohlcData.slice(-lookback);
     this.chartSettings.minPrice = Math.min(...lastXElements.map(e => e[3]));
     this.chartSettings.maxPrice = Math.max(...lastXElements.map(e => e[2]));
-    this.setDynamicCandle(ohlcData[ohlcData.length-2]);
-    this.setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
+    this.setDynamicCandle(ohlcData[ohlcData.length-1]);
+    console.log(ohlcData[ohlcData.length-1]);
+    //this.setStaticCandles(ohlcData.slice(0, ohlcData.length-1));
+    
+    // Create a material for the line
+    const material = new THREE.LineBasicMaterial({ color: 0xffffff });
+
+    // Define the start and end points of the line
+    const startPoint = new THREE.Vector3(0, priceToNDC(5000, this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta), 0);
+    const endPoint = new THREE.Vector3(0, priceToNDC(10000, this.chartSettings.minPrice, this.chartSettings.maxPrice, this.chartSettings.coordinateDelta), 0);
+
+    // Create a buffer geometry for the line and add the start and end points
+    const geometry = new THREE.BufferGeometry();
+    const vertices = new Float32Array([startPoint.x, startPoint.y, startPoint.z, endPoint.x, endPoint.y, endPoint.z]);
+    geometry.setAttribute('position', new THREE.BufferAttribute(vertices, 3));
+
+    // Create the line and add it to the scene
+    const line = new THREE.Line(geometry, material);
+    this.scene.add(line);
   }
 
   // These candles are static, meaning they are fast, but cannot change

@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 
-export default function ScreenToWorldCoords(mousePos: THREE.Vector2, cameraRef: THREE.OrthographicCamera,  screenWidth: number, screenHeight: number): THREE.Vector3 {
+export default function screenToWorldCoords(mousePos: THREE.Vector2, cameraRef: THREE.OrthographicCamera,  screenWidth: number, screenHeight: number): THREE.Vector3 {
   const raycaster = new THREE.Raycaster();
   const x = (mousePos.x / screenWidth) * 2 - 1;
   const y = -(mousePos.y / screenHeight) * 2 + 1;
